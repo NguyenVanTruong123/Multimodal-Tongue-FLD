@@ -1,0 +1,19 @@
+# Các thư viện cốt lõi cho Học máy & Học sâu
+torch>=2.0.0
+torchvision>=0.15.0
+numpy>=1.23.0
+pandas>=1.5.0
+scikit-learn>=1.2.0
+
+# Xử lý ảnh & Tăng cường dữ liệu
+pillow>=9.5.0
+albumentations>=1.3.0
+opencv-python>=4.7.0
+
+# Trực quan hóa & Đánh giá
+matplotlib>=3.7.0
+seaborn>=0.12.0
+tqdm>=4.65.0
+
+# Đọc ghi file dữ liệu
+openpyxl>=3.1.0

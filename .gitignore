@@ -1,0 +1,35 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Checkpoints
+checkpoints/*.pth
+checkpoints/*.pt
+*.ckpt
+
+# Dataset: Exclude large raw images and archives
+data/raw/images/
+data/raw/*.tar.gz*
+data/raw/*.zip
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Temporary files (Office / Windows)
+~$*
+Thumbs.db
+[Dd]esktop.ini
+
+# IDE configs
+.idea/
+.vscode/
+*.swp
