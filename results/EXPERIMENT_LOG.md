@@ -50,17 +50,28 @@ Hệ thống đánh giá 6 cấu hình mô hình trên cùng bộ chia Stratifie
 * **Ngày thực hiện:** 15/10/2026
 * **Tập lệnh thực thi:** `python src/train.py --model m1 --fold -1 --epochs 50`
 * **File lưu kết quả:** `results/m1_5folds_summary.json`
-* **File lưu trọng số tốt nhất:** `checkpoints/best_m1_fold_0.pth` $ightarrow$ `best_m1_fold_4.pth`
+* **File lưu trọng số tốt nhất:** `checkpoints/best_m1_fold_0.pth` $
+ightarrow$ `best_m1_fold_4.pth`
 
 ### 1. Mục tiêu thí nghiệm M1:
 * Thiết lập kết quả mốc cơ sở (Baseline benchmark) khi **chỉ sử dụng 8 chỉ số sinh lý lâm sàng** đo bằng phương pháp truyền thống (chưa tích hợp ảnh lưỡi).
-* Kiểm tra toàn diện sự thông suốt của pipeline huấn luyện: Data Loading $ightarrow$ Chuẩn hóa không rò rỉ $ightarrow$ Huấn luyện MLP $ightarrow$ Early Stopping $ightarrow$ Đánh giá đa độ đo.
+* Kiểm tra toàn diện sự thông suốt của pipeline huấn luyện: Data Loading $
+ightarrow$ Chuẩn hóa không rò rỉ $
+ightarrow$ Huấn luyện MLP $
+ightarrow$ Early Stopping $
+ightarrow$ Đánh giá đa độ đo.
 
 ### 2. Cấu hình kiến trúc & Siêu tham số M1:
 * **Kiến trúc mạng:** Multi-Layer Perceptron (MLP) 3 tầng:
   * Tầng vào: 8 nơ-ron (Gender, Age, Height, Waist, Hipline, Weight, SBP, DBP)
-  * Tầng ẩn 1: `Linear(8, 64)` $ightarrow$ `BatchNorm1d(64)` $ightarrow$ `ReLU()` $ightarrow$ `Dropout(0.3)`
-  * Tầng ẩn 2: `Linear(64, 32)` $ightarrow$ `BatchNorm1d(32)` $ightarrow$ `ReLU()` $ightarrow$ `Dropout(0.3)`
+  * Tầng ẩn 1: `Linear(8, 64)` $
+ightarrow$ `BatchNorm1d(64)` $
+ightarrow$ `ReLU()` $
+ightarrow$ `Dropout(0.3)`
+  * Tầng ẩn 2: `Linear(64, 32)` $
+ightarrow$ `BatchNorm1d(32)` $
+ightarrow$ `ReLU()` $
+ightarrow$ `Dropout(0.3)`
   * Tầng ra: `Linear(32, 3)` (3 mức độ phân loại)
 * **Thuật toán tối ưu:** `AdamW` (Learning rate: $10^{-3}$, Weight decay: $10^{-4}$)
 * **Bộ điều chỉnh tốc độ học:** `CosineAnnealingLR` ($T_{max} = 50$, $\eta_{min} = 10^{-6}$)
@@ -140,3 +151,45 @@ Hệ thống đánh giá 6 cấu hình mô hình trên cùng bộ chia Stratifie
   2. M2 chỉ đạt Recall 17.28% ở lớp bệnh nặng, chứng tỏ nếu chỉ nhìn ảnh lưỡi đơn thuần thì mô hình bỏ sót tới hơn 82% bệnh nhân gan nhiễm mỡ nặng.
   3. Cả 2 mô hình đơn phương thức (M1, M2) đều gặp vấn đề nghiêm trọng với Lớp 2 do mất cân bằng dữ liệu trầm trọng và hàm Cross-Entropy truyền thống.
   4. ĐÂY CHÍNH LÀ ĐỘNG LỰC TO LỚN NHẤT để chúng ta tiến hành thực nghiệm các mô hình Đa phương thức (M3: Multimodal Baseline, M4: Multimodal + Class-Balanced Loss, và M6: Mô hình hoàn chỉnh đề xuất).
+
+
+---
+
+## 5. KẾT QUẢ THỰC NGHIỆM MÔ HÌNH M3 (MULTIMODAL BASELINE: CONVNEXT-TINY + TABULAR MLP + CROSS-ENTROPY)
+
+### 5.1. Thiết lập thực nghiệm M3
+* **Kiến trúc:** Nhánh ảnh sử dụng ConvNeXt-Tiny pre-trained trích xuất vector đặc trưng 768 chiều. Nhánh bảng lâm sàng sử dụng MLP trích xuất 8 chỉ số lâm sàng (Gender, Age, Height, Waist, Hipline, Weight, SBP, DBP) qua các tầng Linear-BatchNorm-ReLU-Dropout. Hai luồng đặc trưng được ghép nối (Feature Concatenation) thành vector đa phương thức trước khi đi qua bộ phân loại (Classifier) 3 lớp.
+* **Hàm mất mát:** Standard Cross-Entropy Loss.
+* **Tối ưu hóa:** AMP FP16, batch_size=64, AdamW (lr=1e-4, weight_decay=1e-4), CosineAnnealingLR (T_max=50), Early Stopping (patience=15).
+* **Môi trường thực thi:** GPU NVIDIA Tesla T4 (Kaggle Cloud).
+
+### 5.2. Bảng kết quả 5-Fold Cross Validation của M3
+| Fold | Accuracy (%) | Macro-F1 (%) | Recall Lớp 0 (Bình thường) | Recall Lớp 1 (Nhẹ/Vừa) | Recall Lớp 2 (Nặng) | MAE | RMSE |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| Fold 0 | 72.55% | 57.43% | 86.45% | 53.47% | 29.13% | 0.3024 | 0.5987 |
+| Fold 1 | 72.12% | 57.64% | 80.62% | 67.99% | 23.30% | 0.2972 | 0.5779 |
+| Fold 2 | 71.30% | 54.43% | 77.24% | 76.16% | 14.56% | 0.2992 | 0.5690 |
+| Fold 3 | 75.77% | 57.20% | 90.65% | 59.27% | 17.48% | 0.2660 | 0.5597 |
+| Fold 4 | 75.59% | 60.06% | 91.19% | 52.32% | 32.04% | 0.2660 | 0.5565 |
+| **TRUNG BÌNH** | **73.47 ± 1.85%** | **57.35 ± 1.79%** | **85.23 ± 6.08%** | **61.84 ± 9.87%** | **23.30 ± 6.64%** | **0.2862 ± 0.0166** | **0.5723 ± 0.0151** |
+
+---
+
+## 6. SO SÁNH ĐỐI ĐẦU 3 MÔ HÌNH: M1 vs M2 vs M3 (Ablation Study Giai đoạn 1)
+
+| Mô hình | Phương thức đầu vào | Loss Function | Accuracy (%) | Macro-F1 (%) | Recall Lớp 2 (Nặng) (%) | MAE | RMSE |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **M1** | Chỉ bảng lâm sàng (MLP) | Cross-Entropy | 72.01 ± 0.85% | 56.77 ± 1.17% | 28.74 ± 2.00% | 0.3007 ± 0.0102 | 0.5849 ± 0.0138 |
+| **M2** | Chỉ ảnh lưỡi (ConvNeXt-Tiny) | Cross-Entropy | 69.34 ± 0.63% | 50.88 ± 1.30% | 17.28 ± 5.15% | 0.3546 ± 0.0134 | 0.6707 ± 0.0227 |
+| **M3** | **Đa phương thức (Ảnh + Bảng)** | **Cross-Entropy** | **73.47 ± 1.85%** | **57.35 ± 1.79%** | **23.30 ± 6.64%** | **0.2862 ± 0.0166** | **0.5723 ± 0.0151** |
+
+### 6.1. Đóng góp khoa học & Phân tích chuyên sâu:
+1. **Sức mạnh cộng hưởng đa phương thức (Multimodal Synergy):**
+   * M3 thiết lập mốc kỷ lục mới trên các thước đo toàn diện: Accuracy (**73.47%**), Macro-F1 (**57.35%**), MAE (**0.2862**) và RMSE (**0.5723**).
+   * Vượt trội so với M1 (+1.46% Acc, +0.58% F1) và áp đảo M2 (+4.13% Acc, +6.47% F1).
+2. **Khắc phục điểm mù thị giác đơn lẻ:**
+   * Thị giác đơn lẻ (M2) chỉ đạt Recall Lớp 2 là 17.28% (bỏ sót >82% ca nặng). M3 kết hợp thông tin lâm sàng đã nâng Recall Lớp 2 lên 23.30% (tăng +6.02%).
+3. **Nút thắt của Cross-Entropy truyền thống (Motivation trực tiếp cho M4 & M6):**
+   * Mặc dù các chỉ số tổng quan tăng mạnh, Recall Lớp 2 ở M3 vẫn bị hạn chế ở mức 23.30% (thấp hơn M1 28.74%).
+   * *Nguyên nhân:* Cross-Entropy bị chi phối bởi lớp đa số (Lớp 0 chiếm 64.5%), mô hình tối ưu hóa bằng cách ưu tiên đoán đúng lớp đông dân nhất.
+   * *Định hướng kế tiếp:* Áp dụng **Class-Balanced Loss (M4)** để bù đắp tần suất mẫu hiệu dụng và cơ chế học thứ tự **CORAL Loss (M5, M6)** để phạt các sai số chẩn đoán xuyên bậc.

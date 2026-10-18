@@ -62,8 +62,9 @@ Hệ thống được module hóa phục vụ so sánh bóc tách từng đóng 
 
 | Cấu hình mô hình | Phương thức | Accuracy (%) | Macro-F1 (%) | Recall Lớp 2 (Nặng) | MAE | Đánh giá |
 | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| **M1 (MLP)** | Chỉ Bảng lâm sàng | **72.01 ± 0.85%** | **56.77 ± 1.17%** | **28.74 ± 2.00%** | **0.3007** | Đã chạy trọn vẹn 5-Fold |
-| **M2 (ConvNeXt-Tiny)** | Chỉ Ảnh lưỡi | **69.34 ± 0.63%** | **50.88 ± 1.30%** | **17.28 ± 5.15%** | **0.3546 ± 0.0134** | Hoàn thành trọn vẹn 5-Fold (Kaggle Cloud) |
+| **M1 (MLP)** | Chỉ Bảng lâm sàng | **72.01 ± 0.85%** | **56.77 ± 1.17%** | **28.74 ± 2.00%** | **0.3007 ± 0.0102** | Đã hoàn thành 5-Fold (Local GPU) |
+| **M2 (ConvNeXt-Tiny)** | Chỉ Ảnh lưỡi | **69.34 ± 0.63%** | **50.88 ± 1.30%** | **17.28 ± 5.15%** | **0.3546 ± 0.0134** | Đã hoàn thành 5-Fold (Kaggle Cloud) |
+| **M3 (Multimodal Baseline)** | **Đa phương thức (Ảnh + Bảng)** | **73.47 ± 1.85%** | **57.35 ± 1.79%** | **23.30 ± 6.64%** | **0.2862 ± 0.0166** | **Đã hoàn thành 5-Fold (Kaggle Cloud)** |
 
 ### 2. Phân tích & Phát hiện khoa học quan trọng (Key Academic Findings)
 1. **Chỉ số sinh hóa chiếm ưu thế vượt trội so với thị giác đơn lẻ:**
