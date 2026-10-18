@@ -111,3 +111,32 @@ Hệ thống đánh giá 6 cấu hình mô hình trên cùng bộ chia Stratifie
 ## 📅 KẾ HOẠCH BƯỚC TIẾP THEO:
 1. Cài đặt bản PyTorch CUDA 12.1 để kích hoạt sức mạnh card đồ họa rời **NVIDIA GeForce RTX 3060**.
 2. Huấn luyện mô hình **M2 (Image Only - ConvNeXt-Tiny)** trên 5.717 ảnh lưỡi để đánh giá sức mạnh độc lập của nguồn dữ liệu hình ảnh.
+
+---
+
+## 4. KẾT QUẢ THỰC NGHIỆM MÔ HÌNH M2 (IMAGE ONLY: CONVNEXT-TINY)
+
+### 4.1. Thiết lập thực nghiệm M2
+* **Kiến trúc:** ConvNeXt-Tiny pre-trained trích xuất đặc trưng ảnh màu lưỡi (768 chiều), classifier 3 lớp.
+* **Tối ưu hóa:** AMP FP16, Tensor Cores, batch_size=64, AdamW (lr=1e-4, weight_decay=1e-4), CosineAnnealingLR (T_max=50), Early Stopping patience=15.
+* **Môi trường thực thi:** NVIDIA Tesla T4 GPU (Kaggle Cloud).
+
+### 4.2. Bảng kết quả 5-Fold Cross Validation của M2
+| Fold | Best Epoch | Accuracy (%) | Macro-F1 (%) | Recall Lớp 2 (Nặng) (%) | MAE | RMSE |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| Fold 0 | 10 | 68.27% | 48.80% | 12.62% | 0.3689 | 0.6974 |
+| Fold 1 | 07 | 69.23% | 50.93% | 15.53% | 0.3593 | 0.6864 |
+| Fold 2 | 08 | 70.08% | 52.88% | 23.30% | 0.3395 | 0.6428 |
+| Fold 3 | 09 | 69.82% | 51.52% | 22.33% | 0.3447 | 0.6559 |
+| Fold 4 | 06 | 69.38% | 50.26% | 12.62% | 0.3605 | 0.6712 |
+| **TRUNG BÌNH** | — | **69.34 ± 0.63%** | **50.88 ± 1.30%** | **17.28 ± 5.15%** | **0.3546 ± 0.0134** | **0.6707 ± 0.0227** |
+
+### 4.3. So sánh đối đầu M1 (Chỉ Bảng) vs M2 (Chỉ Ảnh)
+* **Accuracy:** M1 (72.01%) > M2 (69.34%) (+2.67%).
+* **Macro-F1:** M1 (56.77%) > M2 (50.88%) (+5.89%).
+* **Recall Lớp 2 (Bệnh nặng):** M1 (28.74%) > M2 (17.28%) (+11.46%).
+* **Nhận xét chuyên sâu:**
+  1. Chỉ số sinh hóa cận lâm sàng (M1) có tính quyết định và độ tin cậy phân loại cao hơn đặc trưng thị giác bên ngoài (M2).
+  2. M2 chỉ đạt Recall 17.28% ở lớp bệnh nặng, chứng tỏ nếu chỉ nhìn ảnh lưỡi đơn thuần thì mô hình bỏ sót tới hơn 82% bệnh nhân gan nhiễm mỡ nặng.
+  3. Cả 2 mô hình đơn phương thức (M1, M2) đều gặp vấn đề nghiêm trọng với Lớp 2 do mất cân bằng dữ liệu trầm trọng và hàm Cross-Entropy truyền thống.
+  4. ĐÂY CHÍNH LÀ ĐỘNG LỰC TO LỚN NHẤT để chúng ta tiến hành thực nghiệm các mô hình Đa phương thức (M3: Multimodal Baseline, M4: Multimodal + Class-Balanced Loss, và M6: Mô hình hoàn chỉnh đề xuất).
